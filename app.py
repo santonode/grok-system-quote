@@ -65,8 +65,8 @@ try:
 except requests.exceptions.RequestException as e:
   st.error(f"Error calling xAI API: {e}")
 except KeyError:
+  st.error("Unexpected API response format. Check xAI API documentation for changes.")
 
-st.error("Unexpected API response format. Check xAI API documentation for changes.")
 
 
 
