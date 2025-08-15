@@ -14,8 +14,8 @@ import os
 # Get API key from environment variable
 api_key = os.getenv("XAI_API_KEY")
 if not api_key:
-st.error("XAI_API_KEY environment variable not set. Please set it with your xAI API key from https://x.ai/api")
-st.stop()
+  st.error("XAI_API_KEY environment variable not set. Please set it with your xAI API key from https://x.ai/api")
+  st.stop()
 
 st.title("Quote Analysis Tool")
 
@@ -67,4 +67,5 @@ st.error(f"Error calling xAI API: {e}")
 except KeyError:
 
 st.error("Unexpected API response format. Check xAI API documentation for changes.")
+
 
