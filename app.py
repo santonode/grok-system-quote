@@ -25,10 +25,10 @@ zip_code = st.text_input("Zip Code", help="Enter the zip code.")
 quoted_cost = st.number_input("Quoted Cost ($)", min_value=0.0, help="Enter the cost from the quote.")
 
 if st.button("Analyze Quote"):
-if not project_desc or not city or not zip_code or quoted_cost == 0.0:
-  st.error("Please fill in all fields.")
+  if not project_desc or not city or not zip_code or quoted_cost == 0.0:
+    st.error("Please fill in all fields.")
 else:
-# Construct the prompt for Grok
+  # Construct the prompt for Grok
   prompt = (
   f"Search the web for average or typical costs of similar projects to: '{project_desc}' "
   f"in or near {city}, {zip_code}, United States. "
@@ -67,6 +67,7 @@ except requests.exceptions.RequestException as e:
 except KeyError:
 
 st.error("Unexpected API response format. Check xAI API documentation for changes.")
+
 
 
 
