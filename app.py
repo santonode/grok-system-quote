@@ -26,16 +26,16 @@ quoted_cost = st.number_input("Quoted Cost ($)", min_value=0.0, help="Enter the 
 
 if st.button("Analyze Quote"):
 if not project_desc or not city or not zip_code or quoted_cost == 0.0:
-st.error("Please fill in all fields.")
+  st.error("Please fill in all fields.")
 else:
 # Construct the prompt for Grok
-prompt = (
-f"Search the web for average or typical costs of similar projects to: '{project_desc}' "
-f"in or near {city}, {zip_code}, United States. "
-f"The quoted cost provided is ${quoted_cost:.2f}. "
-f"Compare the quoted cost to the costs you find, analyze if it seems high, low, or reasonable, "
-f"and explain your reasoning. Include sources for the costs you reference."
-)
+  prompt = (
+  f"Search the web for average or typical costs of similar projects to: '{project_desc}' "
+  f"in or near {city}, {zip_code}, United States. "
+  f"The quoted cost provided is ${quoted_cost:.2f}. "
+  f"Compare the quoted cost to the costs you find, analyze if it seems high, low, or reasonable, "
+  f"and explain your reasoning. Include sources for the costs you reference."
+  )
 
 # API request setup
 headers = {
@@ -55,17 +55,18 @@ data = {
 }
 
 try:
-response = requests.post("https://api.x.ai/v1/chat/completions", headers=headers, json=data)
-response.raise_for_status()
-result = response.json()
-analysis = result["choices"][0]["message"]["content"]
-st.markdown("### Analysis")
-st.write(analysis)
-# If citations are available (depending on API response), they might be in result['usage'] or elsewhere; check docs
+  response = requests.post("https://api.x.ai/v1/chat/completions", headers=headers, json=data)
+  response.raise_for_status()
+  result = response.json()
+  analysis = result["choices"][0]["message"]["content"]
+  st.markdown("### Analysis")
+  st.write(analysis)
+  # If citations are available (depending on API response), they might be in result['usage'] or elsewhere; check docs
 except requests.exceptions.RequestException as e:
-st.error(f"Error calling xAI API: {e}")
+  st.error(f"Error calling xAI API: {e}")
 except KeyError:
 
 st.error("Unexpected API response format. Check xAI API documentation for changes.")
+
 
 
