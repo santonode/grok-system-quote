@@ -67,10 +67,3 @@ except requests.exceptions.RequestException as e:
 except KeyError:
   st.error("Unexpected API response format. Check xAI API documentation for changes.")
 
-
-
-
-
-
-
-
