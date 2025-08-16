@@ -27,6 +27,7 @@ quoted_cost = st.number_input("Quoted Cost ($)", min_value=0.0, help="Enter the 
 if st.button("Analyze Quote"):
   if not project_desc or not city or not zip_code or quoted_cost == 0.0:
     st.error("Please fill in all fields.")
+    
 else:
   # Construct the prompt for Grok
   prompt = (
@@ -66,4 +67,5 @@ except requests.exceptions.RequestException as e:
   st.error(f"Error calling xAI API: {e}")
 except KeyError:
   st.error("Unexpected API response format. Check xAI API documentation for changes.")
+
 
