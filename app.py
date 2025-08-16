@@ -55,7 +55,7 @@ data = {
 }
 
 try:
-  response = requests.post("https://api.x.ai/v1/chat/completions", headers=headers, json=data)
+  response = requests.post("https://api.x.ai", headers=headers, json=data)
   response.raise_for_status()
   result = response.json()
   analysis = result["choices"][0]["message"]["content"]
@@ -66,6 +66,7 @@ except requests.exceptions.RequestException as e:
   st.error(f"Error calling xAI API: {e}")
 except KeyError:
   st.error("Unexpected API response format. Check xAI API documentation for changes.")
+
 
 
 
