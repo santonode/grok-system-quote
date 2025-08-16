@@ -30,11 +30,11 @@ if st.button("Analyze Quote"):
 else:
   # Construct the prompt for Grok
   prompt = (
-  f"Search the web for average or typical costs of similar projects to: '{project_desc}' "
-  f"in or near {city}, {zip_code}, United States. "
-  f"The quoted cost provided is ${quoted_cost:.2f}. "
-  f"Compare the quoted cost to the costs you find, analyze if it seems high, low, or reasonable, "
-  f"and explain your reasoning. Include sources for the costs you reference."
+    f"Search the web for average or typical costs of similar projects to: '{project_desc}' "
+    f"in or near {city}, {zip_code}, United States. "
+    f"The quoted cost provided is ${quoted_cost:.2f}. "
+    f"Compare the quoted cost to the costs you find, analyze if it seems high, low, or reasonable, "
+    f"and explain your reasoning. Include sources for the costs you reference."
   )
 
 # API request setup
@@ -66,6 +66,7 @@ except requests.exceptions.RequestException as e:
   st.error(f"Error calling xAI API: {e}")
 except KeyError:
   st.error("Unexpected API response format. Check xAI API documentation for changes.")
+
 
 
 
