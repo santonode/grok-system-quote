@@ -1,3 +1,8 @@
+The error in your Python code occurs at line 48 in `app.py`, specifically in the construction of the `data` dictionary for the API request. The issue is a syntax error due to a misplaced `else` block and an indentation problem. The `else` block is incorrectly aligned with the `if st.button("Analyze Quote"):` condition, and the API request logic should be inside the `if` block to execute only when the button is clicked and all fields are filled.
+
+Here’s the corrected version of your code with proper indentation and structure:
+
+```python
 # app.py
 # This is a simple Streamlit web app for quote analysis using the xAI Grok API for searching and analyzing costs.
 # To deploy on render.com:
@@ -14,8 +19,8 @@ import os
 # Get API key from environment variable
 api_key = os.getenv("XAI_API_KEY")
 if not api_key:
-  st.error("XAI_API_KEY environment variable not set. Please set it with your xAI API key from https://x.ai/api")
-  st.stop()
+    st.error("XAI_API_KEY environment variable not set. Please set it with your xAI API key from https://x.ai/api")
+    st.stop()
 
 st.title("Quote Analysis Tool")
 
@@ -25,47 +30,44 @@ zip_code = st.text_input("Zip Code", help="Enter the zip code.")
 quoted_cost = st.number_input("Quoted Cost ($)", min_value=0.0, help="Enter the cost from the quote.")
 
 if st.button("Analyze Quote"):
-  if not project_desc or not city or not zip_code or quoted_cost == 0.0:
-    st.error("Please fill in all fields.")
-    
-else:
-  # Construct the prompt for Grok
-  prompt = (
-    f"Search the web for average or typical costs of similar projects to: '{project_desc}' "
-    f"in or near {city}, {zip_code}, United States. "
-    f"The quoted cost provided is ${quoted_cost:.2f}. "
-    f"Compare the quoted cost to the costs you find, analyze if it seems high, low, or reasonable, "
-    f"and explain your reasoning. Include sources for the costs you reference."
-  )
+    if not project_desc or not city or not zip_code or quoted_cost == 0.0:
+        st.error("Please fill in all fields.")
+    else:
+        # Construct the prompt for Grok
+        prompt = (
+            f"Search the web for average or typical costs of similar projects to: '{project_desc}' "
+            f"in or near {city}, {zip_code}, United States. "
+            f"The quoted cost provided is ${quoted_cost:.2f}. "
+            f"Compare the quoted cost to the costs you find, analyze if it seems high, low, or reasonable, "
+            f"and explain your reasoning. Include sources for the costs you reference."
+        )
 
-# API request setup
-headers = {
-"Content-Type": "application/json",
-"Authorization": f"Bearer {api_key}"
-}
-data = {
-"model": "grok-4", # Use the latest Grok model; check xAI docs for available models
-"messages": [{"role": "user", "content": prompt}],
-"search_parameters": {
-"mode": "on",
-"sources": [{"type": "web", "country": "US"}],
-"return_citations": True
-},
-"temperature": 0.7,
-"max_tokens": 1024
-}
+        # API request setup
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}"
+        }
+        data = {
+            "model": "grok-4",  # Use the latest Grok model; check xAI docs for available models
+            "messages": [{"role": "user", "content": prompt}],
+            "search_parameters": {
+                "mode": "on",
+                "sources": [{"type": "web", "country": "US"}],
+                "return_citations": True
+            },
+            "temperature": 0.7,
+            "max_tokens": 1024
+        }
 
-try:
-  response = requests.post("https://api.x.ai/v1/chat/completions", headers=headers, json=data)
-  response.raise_for_status()
-  result = response.json()
-  analysis = result["choices"][0]["message"]["content"]
-  st.markdown("### Analysis")
-  st.write(analysis)
-  # If citations are available (depending on API response), they might be in result['usage'] or elsewhere; check docs
-except requests.exceptions.RequestException as e:
-  st.error(f"Error calling xAI API: {e}")
-except KeyError:
-  st.error("Unexpected API response format. Check xAI API documentation for changes.")
-
-
+        try:
+            response = requests.post("https://api.x.ai/v1/chat/completions", headers=headers, json=data)
+            response.raise_for_status()
+            result = response.json()
+            analysis = result["choices"][0]["message"]["content"]
+            st.markdown("### Analysis")
+            st.write(analysis)
+            # If citations are available (depending on API response), they might be in result['usage'] or elsewhere; check docs
+        except requests.exceptions.RequestException as e:
+            st.error(f"Error calling xAI API: {e}")
+        except KeyError:
+            st.error("Unexpected API response format. Check xAI API documentation for changes.")
