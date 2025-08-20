@@ -1,8 +1,3 @@
-The error in your Python code occurs at line 48 in `app.py`, specifically in the construction of the `data` dictionary for the API request. The issue is a syntax error due to a misplaced `else` block and an indentation problem. The `else` block is incorrectly aligned with the `if st.button("Analyze Quote"):` condition, and the API request logic should be inside the `if` block to execute only when the button is clicked and all fields are filled.
-
-Here’s the corrected version of your code with proper indentation and structure:
-
-```python
 # app.py
 # This is a simple Streamlit web app for quote analysis using the xAI Grok API for searching and analyzing costs.
 # To deploy on render.com:
@@ -71,3 +66,4 @@ if st.button("Analyze Quote"):
             st.error(f"Error calling xAI API: {e}")
         except KeyError:
             st.error("Unexpected API response format. Check xAI API documentation for changes.")
+
