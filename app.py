@@ -34,7 +34,7 @@ if st.button("Analyze Quote"):
             f"in or near {city}, {zip_code}, United States. "
             f"The quoted cost provided is ${quoted_cost:.2f}. "
             f"Compare the quoted cost to the costs you find, analyze if it seems high, low, or reasonable, "
-            f"and explain your reasoning. Include sources for the costs you reference."
+            f"and explain your reasoning. Include sources for the costs you reference and format your output in asy to read font."
         )
 
         # API request setup
@@ -66,4 +66,5 @@ if st.button("Analyze Quote"):
             st.error(f"Error calling xAI API: {e}")
         except KeyError:
             st.error("Unexpected API response format. Check xAI API documentation for changes.")
+
 
