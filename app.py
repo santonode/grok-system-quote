@@ -1,41 +1,50 @@
 # app.py
-# This is a simple Streamlit web app for quote analysis using the xAI Grok API for searching and analyzing costs.
-# To deploy on render.com:
-# 1. Create a new Web Service on render.com, connect to your GitHub repo containing this file and requirements.txt.
-# 2. Set the build command to: pip install -r requirements.txt
-# 3. Set the start command to: streamlit run app.py --server.port $PORT --server.enableCORS false
-# 4. Add an environment variable XAI_API_KEY with your API key obtained from https://x.ai/api
-# Note: Using the Grok API may incur costs, especially for live search. See xAI docs for details.
+# Streamlit web app for quote analysis using the xAI Grok API.
+# Deploy on render.com with:
+# Build: pip install -r requirements.txt
+# Start: streamlit run app.py --server.port $PORT --server.enableCORS false
+# Env: XAI_API_KEY from https://x.ai/api
 
 import streamlit as st
 import requests
 import os
+import json
+import re
 
-# Get API key from environment variable
+# Get API key
 api_key = os.getenv("XAI_API_KEY")
 if not api_key:
-    st.error("XAI_API_KEY environment variable not set. Please set it with your xAI API key from https://x.ai/api")
+    st.error("XAI_API_KEY not set. Get it from https://x.ai/api")
     st.stop()
+
+# Sanitize text to remove formatting issues
+def sanitize_text(text):
+    text = re.sub(r'\s*([^\s])\s*', r'\1', text)  # Remove spaces between characters
+    text = re.sub(r'∗+', '', text)  # Remove stray asterisks
+    text = re.sub(r'\s+', ' ', text)  # Replace multiple spaces with single
+    text = re.sub(r'[−]', '-', text)  # Normalize dashes
+    return text.strip()
 
 st.title("Quote Analysis Tool")
 
-project_desc = st.text_area("Project Description", help="Describe the project, e.g., 'Kitchen remodel including new cabinets and countertops.'")
-city = st.text_input("City", help="Enter the city in the United States.")
+project_desc = st.text_area("Project Description", help="Describe the project (max 500 chars).")
+if len(project_desc) > 500:
+    st.error("Project description exceeds 500 characters. Please shorten it.")
+    st.stop()
+city = st.text_input("City", help="Enter the city in the US.")
 zip_code = st.text_input("Zip Code", help="Enter the zip code.")
-quoted_cost = st.number_input("Quoted Cost ($)", min_value=0.0, help="Enter the cost from the quote.")
+quoted_cost = st.number_input("Quoted Cost ($)", min_value=0.0, help="Enter the quoted cost.")
 
 if st.button("Analyze Quote"):
     if not project_desc or not city or not zip_code or quoted_cost == 0.0:
         st.error("Please fill in all fields.")
     else:
-        # Construct the prompt for Grok
+        # Construct clear prompt
         prompt = (
-            f"Search the web for average or typical costs of similar projects to: '{project_desc}' "
-            f"in or near {city}, {zip_code}, United States. "
-            f"The quoted cost provided is ${quoted_cost:.2f}. "
-            f"Compare the quoted cost to the costs you find, analyze if it seems high, low, or reasonable, "
-            f"and explain your reasoning in a concise manner. Include three sources for the costs you reference. "
-            f"Output your analysis in plain text only. "
+            f"Search the web for average costs of '{project_desc}' in or near {city}, {zip_code}, US. "
+            f"The quoted cost is ${quoted_cost:.2f}. Compare and state if it’s high, low, or reasonable. "
+            f"Explain briefly in clear, concise Markdown format with bullet points for key findings. "
+            f"Include up to 3 sources. Avoid extra spaces, special characters, or formatting errors."
         )
 
         # API request setup
@@ -44,7 +53,7 @@ if st.button("Analyze Quote"):
             "Authorization": f"Bearer {api_key}"
         }
         data = {
-            "model": "grok-4",  # Use the latest Grok model; check xAI docs for available models
+            "model": "grok-4",
             "messages": [{"role": "user", "content": prompt}],
             "search_parameters": {
                 "mode": "on",
@@ -58,17 +67,20 @@ if st.button("Analyze Quote"):
         try:
             response = requests.post("https://api.x.ai/v1/chat/completions", headers=headers, json=data)
             response.raise_for_status()
+            response.encoding = 'utf-8'
             result = response.json()
             analysis = result["choices"][0]["message"]["content"]
+            analysis = sanitize_text(analysis)
+            if result["choices"][0].get("finish_reason") == "length":
+                st.warning("Response may be incomplete due to token limit.")
+            with open("api_response.json", "w") as f:
+                json.dump(result, f, indent=2)
             st.markdown("### Analysis")
-            st.write(analysis)
-            # If citations are available (depending on API response), they might be in result['usage'] or elsewhere; check docs
+            with st.expander("View Detailed Analysis"):
+                st.markdown(analysis, unsafe_allow_html=False)
+            with st.expander("Debug: Raw API Response"):
+                st.json(result)
         except requests.exceptions.RequestException as e:
             st.error(f"Error calling xAI API: {e}")
         except KeyError:
-            st.error("Unexpected API response format. Check xAI API documentation for changes.")
-
-
-
-
-
+            st.error("Unexpected API response format. Check xAI API docs.")
